@@ -1,5 +1,13 @@
+#![allow(non_snake_case)]
+use std::fs::File;
+use std::io::Read;
+
 use clap::Parser;
 
+use ndarray::Array;
+use ndarray::Ix4;
+
+/// Argument struct for the CLI
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -10,7 +18,7 @@ struct Args {
     /// The side length of the hypercube. This shouldn't change to adhere to
     /// the spec, but might be interesting to play around with.
     #[clap(short, long, default_value_t = 8)]
-    count: u8,
+    count: usize,
 }
 
 fn main() {
@@ -20,7 +28,6 @@ fn main() {
 
     file.read_to_string(&mut source).expect("Read to string failed.");
 
-    println!(source);
-
+    let mut mem = Array::<u32, Ix4>
+        ::zeros((args.count, args.count, args.count, args.count));
 }
-
