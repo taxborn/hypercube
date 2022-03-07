@@ -5,6 +5,8 @@ use std::io::Read;
 use clap::Parser;
 use ndarray::{Array, Ix4};
 
+type Cell = usize;
+
 /// Argument struct for the CLI
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -16,7 +18,20 @@ struct Args {
     /// The side length of the hypercube. This shouldn't change to adhere to
     /// the spec, but might be interesting to play around with.
     #[clap(short, long, default_value_t = 8)]
-    count: usize,
+    count: Cell,
+}
+
+struct Loc {
+    x: Cell,
+    y: Cell,
+    z: Cell,
+    w: Cell,
+}
+
+impl Loc {
+    fn new() -> Self {
+        Loc { x: 0, y: 0, z: 0, w: 0 }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -61,14 +76,14 @@ fn main() {
 
     file.read_to_string(&mut source).expect("Read to string failed.");
 
-    let mut mem = Array::<u32, Ix4>
+    let mut mem = Array::<u8, Ix4>
         ::zeros((args.count, args.count, args.count, args.count));
 
     let tokens = lexer(source);
     let instructions = parser(tokens);
 
-    println!("INSTRUCTIONS:");
-    println!("{:?}", instructions);
+    let mut locator = Loc::new();
+    run(instructions, &mut mem, &mut locator);
 }
 
 fn lexer(source: String) -> Vec<Token> {
@@ -160,4 +175,47 @@ fn parser(tokens: Vec<Token>) -> Vec<Instruction> {
     }
 
     instructions
+}
+
+fn run(instructions: Vec<Instruction>, mem: &mut Array::<u8, Ix4>, 
+        locator: &mut Loc) {
+    for instruction in instructions {
+        match instruction {
+            Instruction::IncrementX => locator.x += 1,
+            Instruction::DecrementX => locator.x -= 1,
+            Instruction::IncrementY => locator.y += 1,
+            Instruction::DecrementY => locator.y -= 1,
+            Instruction::IncrementZ => locator.z += 1,
+            Instruction::DecrementZ => locator.z -= 1,
+            Instruction::IncrementW => locator.w += 1,
+            Instruction::DecrementW => locator.w -= 1,
+            Instruction::Increment => {
+                mem[[locator.x, locator.y, locator.z, locator.w]] += 1
+            },
+            Instruction::Decrement => {
+                mem[[locator.x, locator.y, locator.z, locator.w]] -= 1
+            },
+            Instruction::Write => print!(
+                "{}",
+                mem[[locator.x, locator.y, locator.z, locator.w]] as char
+            ),
+            Instruction::Read => {
+                let mut input: [u8; 1] = [0; 1];
+
+                std::io::stdin()
+                    .read_exact(&mut input)
+                    .expect("Failed to read data.");
+
+                mem[[locator.x, locator.y, locator.z, locator.w]] = input[0];
+            }
+            Instruction::Loop(instructions) => {
+                let zeroArray = Array::<u8, Ix4>
+                    ::zeros((8, 8, 8, 8));
+
+                while mem != &zeroArray {
+                    run(instructions.to_owned(), mem, locator);
+                }
+            }
+        }
+    }
 }
