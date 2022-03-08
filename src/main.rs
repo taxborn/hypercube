@@ -75,21 +75,67 @@ impl Loc {
     }
 
     fn mov(
-        mut self,
+        &mut self,
         direction: Direction,
         steps: isize,
     ) -> Result<(), MovError> {
         match direction {
             Direction::XPos => {
-                println!("before: moved {} steps. curr: {}", steps, self.x);
                 if self.x + steps as usize >= 8 {
                     return Err(MovError { direction: Direction::XPos });
                 }
 
                 self.x += steps as usize;
-                println!("after: moved {} steps. curr: {}", steps, self.x);
             },
-            _ => ()
+            Direction::XNeg => {
+                if self.x as isize - steps < 0 {
+                    return Err(MovError { direction: Direction::XNeg });
+                }
+
+                self.x -= steps as usize;
+            },
+            Direction::YPos => {
+                if self.y + steps as usize >= 8 {
+                    return Err(MovError { direction: Direction::YPos });
+                }
+
+                self.y += steps as usize;
+            },
+            Direction::YNeg => {
+                if self.y as isize - steps < 0 {
+                    return Err(MovError { direction: Direction::YNeg });
+                }
+
+                self.y -= steps as usize;
+            },
+            Direction::ZPos => {
+                if self.z + steps as usize >= 8 {
+                    return Err(MovError { direction: Direction::ZPos });
+                }
+
+                self.z += steps as usize;
+            },
+            Direction::ZNeg => {
+                if self.z as isize - steps < 0 {
+                    return Err(MovError { direction: Direction::ZNeg });
+                }
+
+                self.z -= steps as usize;
+            },
+            Direction::WPos => {
+                if self.w + steps as usize >= 8 {
+                    return Err(MovError { direction: Direction::WPos });
+                }
+
+                self.w += steps as usize;
+            },
+            Direction::WNeg => {
+                if self.w as isize - steps < 0 {
+                    return Err(MovError { direction: Direction::WNeg });
+                }
+
+                self.w -= steps as usize;
+            },
         }
 
         Ok(())
@@ -254,7 +300,7 @@ fn run(
     for instruction in instructions {
         match instruction {
             Instruction::IncrementX => {
-                if let Err(e) = locator.mov(Direction::XPos, 1) {
+                if let Err(e) = locator.mov(Direction::XPos, 9) {
                     return Err(e);
                 }
             }
