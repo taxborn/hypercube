@@ -7,9 +7,6 @@ use std::io::Read;
 use clap::Parser;
 use ndarray::{Array, Ix4};
 
-// A custom type for readability for a cell.
-type Cell = usize;
-
 /// Argument struct for the CLI
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -22,17 +19,18 @@ struct Args {
     //
     // TODO: The barrier here is that this is a runtime found value, and that
     // causes issues if I want to use the value at compile time.
-    //#[clap(short, long, default_value_t = 8)]
-    //count: Cell,
+    #[clap(short, long, default_value_t = 8)]
+    count: usize,
 }
 
 // The location struct to hold the current position of our program
 #[derive(Clone, Copy)]
 struct Loc {
-    x: Cell,
-    y: Cell,
-    z: Cell,
-    w: Cell,
+    x: usize,
+    y: usize,
+    z: usize,
+    w: usize,
+    count: usize,
 }
 
 #[derive(Debug)]
@@ -65,12 +63,13 @@ impl fmt::Display for MovError {
 
 impl Loc {
     // Create a new location struct
-    fn new() -> Self {
+    fn new(count: usize) -> Self {
         Loc {
             x: 0,
             y: 0,
             z: 0,
             w: 0,
+            count
         }
     }
 
@@ -81,7 +80,7 @@ impl Loc {
     ) -> Result<(), MovError> {
         match direction {
             Direction::XPos => {
-                if self.x + steps as usize >= 8 {
+                if self.x + steps as usize >= self.count {
                     return Err(MovError {
                         direction: Direction::XPos,
                     });
@@ -99,7 +98,7 @@ impl Loc {
                 self.x -= steps as usize;
             }
             Direction::YPos => {
-                if self.y + steps as usize >= 8 {
+                if self.y + steps as usize >= self.count {
                     return Err(MovError {
                         direction: Direction::YPos,
                     });
@@ -117,7 +116,7 @@ impl Loc {
                 self.y -= steps as usize;
             }
             Direction::ZPos => {
-                if self.z + steps as usize >= 8 {
+                if self.z + steps as usize >= self.count {
                     return Err(MovError {
                         direction: Direction::ZPos,
                     });
@@ -135,7 +134,7 @@ impl Loc {
                 self.z -= steps as usize;
             }
             Direction::WPos => {
-                if self.w + steps as usize >= 8 {
+                if self.w + steps as usize >= self.count {
                     return Err(MovError {
                         direction: Direction::WPos,
                     });
@@ -196,20 +195,23 @@ enum Instruction {
 
 fn main() {
     let args = Args::parse();
+    let count = args.count;
     let mut file = File::open(args.file).expect("Open failed.");
     let mut source = String::new();
 
     file.read_to_string(&mut source)
         .expect("Read to string failed.");
 
-    let mut mem = Array::<u8, Ix4>::zeros((8, 8, 8, 8));
+    let mut mem = Array::<u8, Ix4>::zeros((
+        count, count, count, count,
+    ));
 
     let tokens = lexer(source);
     let instructions = parser(tokens);
 
-    let mut locator = Loc::new();
+    let mut locator = Loc::new(count);
 
-    match run(instructions, &mut mem, &mut locator) {
+    match run(instructions, &mut mem, &mut locator, count) {
         Ok(()) => (),
         Err(e) => eprintln!("{}", e),
     }
@@ -312,6 +314,7 @@ fn run(
     instructions: Vec<Instruction>,
     mem: &mut Array<u8, Ix4>,
     locator: &mut Loc,
+    count: usize
 ) -> Result<(), MovError> {
     for instruction in instructions {
         match instruction {
@@ -375,10 +378,10 @@ fn run(
                 mem[[locator.x, locator.y, locator.z, locator.w]] = input[0];
             }
             Instruction::Loop(instructions) => {
-                let zeroArray = Array::<u8, Ix4>::zeros((8, 8, 8, 8));
+                let zeroArray = Array::<u8, Ix4>::zeros((count, count, count, count));
 
                 while mem.to_owned() != zeroArray {
-                    match run(instructions.to_owned(), mem, locator) {
+                    match run(instructions.to_owned(), mem, locator, count) {
                         Ok(()) => (),
                         Err(e) => eprintln!("{}", e),
                     }
