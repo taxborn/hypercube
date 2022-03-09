@@ -13,9 +13,9 @@ mod locator;
 mod parser;
 
 use errors::MovError;
-use parser::Instruction;
-use locator::Loc;
 use locator::Direction;
+use locator::Loc;
+use parser::Instruction;
 
 /// Argument struct for the CLI
 #[derive(Parser, Debug)]
@@ -39,9 +39,7 @@ fn main() {
     file.read_to_string(&mut source)
         .expect("Read to string failed.");
 
-    let mut mem = Array::<u8, Ix4>::zeros((
-        count, count, count, count,
-    ));
+    let mut mem = Array::<u8, Ix4>::zeros((count, count, count, count));
 
     let tokens = lexer::lex(source);
     let instructions = parser::parse(tokens);
@@ -58,7 +56,7 @@ fn run(
     instructions: Vec<Instruction>,
     mem: &mut Array<u8, Ix4>,
     locator: &mut Loc,
-    count: usize
+    count: usize,
 ) -> Result<(), MovError> {
     for instruction in instructions {
         match instruction {
@@ -122,7 +120,8 @@ fn run(
                 mem[[locator.x, locator.y, locator.z, locator.w]] = input[0];
             }
             Instruction::Loop(instructions) => {
-                let zeroArray = Array::<u8, Ix4>::zeros((count, count, count, count));
+                let zeroArray =
+                    Array::<u8, Ix4>::zeros((count, count, count, count));
 
                 while mem.to_owned() != zeroArray {
                     match run(instructions.to_owned(), mem, locator, count) {

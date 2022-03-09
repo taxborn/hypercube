@@ -30,7 +30,7 @@ impl Loc {
             y: 0,
             z: 0,
             w: 0,
-            count
+            count,
         }
     }
 
