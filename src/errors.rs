@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::Direction;
 
-// Use a unit struct to declare custom 'Falling off the hypercube' error.
+// Use a structure to declare custom 'Falling off the hypercube' error.
 pub struct MovError {
     pub direction: Direction,
 }

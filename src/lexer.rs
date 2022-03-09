@@ -17,6 +17,7 @@ pub enum Token {
     LoopEnd,
 }
 
+// Our lexer, which takes in a source string, and converts it into a vector of Tokens
 pub fn lex(source: String) -> Vec<Token> {
     let mut tokens = Vec::new();
 
@@ -38,6 +39,7 @@ pub fn lex(source: String) -> Vec<Token> {
             ']' => Some(Token::LoopEnd),
             _ => None,
         };
+
         match token {
             Some(token) => tokens.push(token),
             None => (),

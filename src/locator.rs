@@ -10,6 +10,7 @@ pub struct Loc {
     count: usize,
 }
 
+// The directions in which we can move in our 'hypercube' of memory
 #[derive(Debug)]
 pub enum Direction {
     XPos,
@@ -22,8 +23,9 @@ pub enum Direction {
     WNeg,
 }
 
+// A location structure so we can keep track of where we are in memory. This is 
+// how we keep track while we are interpreting the program.
 impl Loc {
-    // Create a new location struct
     pub fn new(count: usize) -> Self {
         Loc {
             x: 0,
@@ -34,6 +36,10 @@ impl Loc {
         }
     }
 
+    // Move a certain direction, a certain number of steps. We prefer using this
+    // function over just manually changing the variables of the structure because
+    // we need to make sure we are in the bounds of the memory. This also gives
+    // us a good way to describe movement.
     pub fn mov(
         &mut self,
         direction: Direction,
