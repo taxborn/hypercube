@@ -23,7 +23,7 @@ pub enum Direction {
     WNeg,
 }
 
-// A location structure so we can keep track of where we are in memory. This is 
+// A location structure so we can keep track of where we are in memory. This is
 // how we keep track while we are interpreting the program.
 impl Loc {
     pub fn new(count: usize) -> Self {

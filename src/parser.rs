@@ -1,5 +1,6 @@
 use crate::lexer::Token;
 
+// Our instrction set
 #[derive(Debug, Clone)]
 pub enum Instruction {
     IncrementX,
@@ -17,6 +18,7 @@ pub enum Instruction {
     Loop(Vec<Instruction>),
 }
 
+// The parser that takes in a vector of Tokens and outputs a vector of Instructions
 pub fn parse(tokens: Vec<Token>) -> Vec<Instruction> {
     let mut instructions: Vec<Instruction> = Vec::new();
     let mut loop_stack = 0;

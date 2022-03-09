@@ -64,6 +64,9 @@ fn main() {
     }
 }
 
+// The interpreter. Takes in a vector of instructions, working memory for the
+// interpreter, a locator to keep track of where we are, and the length of a
+// side of the hypercube.
 fn run(
     instructions: Vec<Instruction>,
     mem: &mut Array<u8, Ix4>,
