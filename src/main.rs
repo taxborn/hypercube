@@ -99,6 +99,7 @@ fn run(
     locator: &mut Loc,
     count: usize,
 ) -> Result<(), MovError> {
+    // Loop over all of the instructions
     for instruction in instructions {
         match instruction {
             Instruction::IncrementX => locator.mov(Direction::XPos, 1)?,
@@ -129,9 +130,12 @@ fn run(
                 mem[[locator.x, locator.y, locator.z, locator.w]] = input[0];
             }
             Instruction::Loop(instructions) => {
+                // A zeroed out 4d memory hypercube for comparison purposes.
                 let zeroArray =
                     Array::<u8, Ix4>::zeros((count, count, count, count));
 
+                // Loop through the 'inner' instructions of the loop while
+                // there are still instructions.
                 while mem.to_owned() != zeroArray {
                     match run(instructions.to_owned(), mem, locator, count) {
                         Ok(()) => (),
