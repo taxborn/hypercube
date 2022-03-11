@@ -21,16 +21,25 @@ use parser::Instruction;
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
-    /// The file name
-    #[clap(short, long)]
+    /// The file name.
+    #[clap(short = 'f', long)]
     file: String,
 
     // The side length of the hypercube. This shouldn't change to adhere to
     // the spec, but might be interesting to play around with. This value
     // gives us n^4 memory cells, so definitely be careful when altering this
     // value.
-    #[clap(short, long, default_value_t = 8)]
+    /// The side length of the 'hypercube' of memory.
+    #[clap(short = 'n', long, default_value_t = 8)]
     count: usize,
+
+    /// Show the tokens the lexer outputs.
+    #[clap(short = 't', long)]
+    show_tokens: bool,
+
+    /// Show the instructions the parser outputs.
+    #[clap(short = 'i', long)]
+    show_instructions: bool,
 }
 
 fn main() {
@@ -49,18 +58,35 @@ fn main() {
 
     // Use the lexer to store a vector of Tokens
     let tokens = lexer::lex(source);
+
+    // Debug information for the tokens
+    if args.show_tokens {
+        println!("Tokens:");
+        println!("{:?}", &tokens);
+    }
+
     // Use the parser to store a vector of Instructions
     let instructions = parser::parse(tokens);
+
+    // Debug information for the instructions
+    if args.show_instructions {
+        println!("Instructions:");
+        println!("{:?}", &instructions);
+    }
 
     // Create a locator for the interpreter.
     //
     // TODO: Maybe the interpreter should create this itself?
     let mut locator = Loc::new(count);
 
-    // Interpret the program!
-    match run(instructions, &mut mem, &mut locator, count) {
-        Ok(()) => (),
-        Err(e) => eprintln!("{}", e),
+    // If we wanted to output the tokens or instructions, maybe we didn't want
+    // to run the program.
+    if !args.show_tokens && !args.show_instructions {
+        // Interpret the program!
+        match run(instructions, &mut mem, &mut locator, count) {
+            Ok(()) => (),
+            Err(e) => eprintln!("{}", e),
+        }
     }
 }
 
