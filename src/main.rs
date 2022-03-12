@@ -12,6 +12,7 @@ mod lexer;
 mod locator;
 mod parser;
 
+use errors::LoopError;
 use errors::MovError;
 use locator::Direction;
 use locator::Loc;
@@ -42,7 +43,7 @@ struct Args {
     show_instructions: bool,
 }
 
-fn main() {
+fn main() -> Result<(), LoopError> {
     let args = Args::parse();
     let count = args.count;
 
@@ -66,7 +67,7 @@ fn main() {
     }
 
     // Use the parser to store a vector of Instructions
-    let instructions = parser::parse(tokens);
+    let instructions = parser::parse(tokens)?;
 
     // Debug information for the instructions
     if args.show_instructions {
@@ -88,6 +89,8 @@ fn main() {
             Err(e) => eprintln!("{}", e),
         }
     }
+
+    Ok(())
 }
 
 // The interpreter. Takes in a vector of instructions, working memory for the

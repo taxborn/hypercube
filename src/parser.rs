@@ -1,3 +1,5 @@
+use crate::errors::LoopError;
+use crate::errors::LoopSide;
 use crate::lexer::Token;
 
 // Our instrction set
@@ -19,7 +21,7 @@ pub enum Instruction {
 }
 
 // The parser that takes in a vector of Tokens and outputs a vector of Instructions
-pub fn parse(tokens: Vec<Token>) -> Vec<Instruction> {
+pub fn parse(tokens: Vec<Token>) -> Result<Vec<Instruction>, LoopError> {
     let mut instructions: Vec<Instruction> = Vec::new();
     let mut loop_stack = 0;
     let mut loop_start = 0;
@@ -46,7 +48,10 @@ pub fn parse(tokens: Vec<Token>) -> Vec<Instruction> {
                     None
                 }
                 Token::LoopEnd => {
-                    panic!("Loop ending at #{} has no beginning.", idx)
+                    return Err(LoopError {
+                        side: LoopSide::Beginning,
+                        count: idx,
+                    });
                 }
             };
 
@@ -63,7 +68,7 @@ pub fn parse(tokens: Vec<Token>) -> Vec<Instruction> {
                     if loop_stack == 0 {
                         instructions.push(Instruction::Loop(parse(
                             tokens[loop_start + 1..idx].to_vec(),
-                        )));
+                        )?));
                     }
                 }
 
@@ -73,11 +78,11 @@ pub fn parse(tokens: Vec<Token>) -> Vec<Instruction> {
     }
 
     if loop_stack != 0 {
-        panic!(
-            "Loop that starts at #{} has no matching ending!",
-            loop_start
-        );
+        return Err(LoopError {
+            side: LoopSide::Ending,
+            count: loop_start,
+        });
     }
 
-    instructions
+    Ok(instructions)
 }
