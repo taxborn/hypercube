@@ -105,24 +105,37 @@ fn run(
     // Loop over all of the instructions
     for instruction in instructions {
         match instruction {
+            // Increment the X pointer.
             Instruction::IncrementX => locator.mov(Direction::XPos, 1)?,
+            // Decrement the X pointer.
             Instruction::DecrementX => locator.mov(Direction::XNeg, 1)?,
+            // Increment the Y pointer.
             Instruction::IncrementY => locator.mov(Direction::YPos, 1)?,
+            // Decrement the Y pointer.
             Instruction::DecrementY => locator.mov(Direction::YNeg, 1)?,
+            // Increment the Z pointer.
             Instruction::IncrementZ => locator.mov(Direction::ZPos, 1)?,
+            // Decrement the Z pointer.
             Instruction::DecrementZ => locator.mov(Direction::ZNeg, 1)?,
+            // Increment the W pointer.
             Instruction::IncrementW => locator.mov(Direction::WPos, 1)?,
+            // Decrement the W pointer.
             Instruction::DecrementW => locator.mov(Direction::WNeg, 1)?,
+            // Increment the value of the current cell under the locator.
             Instruction::Increment => {
                 mem[[locator.x, locator.y, locator.z, locator.w]] += 1
             }
+            // Decrement the value of the current cell under the locator.
             Instruction::Decrement => {
                 mem[[locator.x, locator.y, locator.z, locator.w]] -= 1
             }
+            // Write to stdout the current character represented by the memory 
+            // cell.
             Instruction::Write => print!(
                 "{}",
                 mem[[locator.x, locator.y, locator.z, locator.w]] as char
             ),
+            // Read from stdin a character, and put its value into the current cell.
             Instruction::Read => {
                 let mut input: [u8; 1] = [0; 1];
 
@@ -132,6 +145,7 @@ fn run(
 
                 mem[[locator.x, locator.y, locator.z, locator.w]] = input[0];
             }
+            // A loop instruction.
             Instruction::Loop(instructions) => {
                 // A zeroed out 4d memory hypercube for comparison purposes.
                 let zeroArray =
@@ -141,7 +155,11 @@ fn run(
                 // there are still instructions.
                 while mem.to_owned() != zeroArray {
                     match run(instructions.to_owned(), mem, locator, count) {
+                        // All is well, nothing to return.
                         Ok(()) => (),
+                        // 'Falling off the hypercube' happened.
+                        // 
+                        // TODO: Should this be a panic instead?
                         Err(e) => eprintln!("{}", e),
                     }
                 }
@@ -149,5 +167,6 @@ fn run(
         }
     }
 
+    // All is well, nothing to return.
     Ok(())
 }
