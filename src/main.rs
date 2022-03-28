@@ -129,7 +129,7 @@ fn run(
             Instruction::Decrement => {
                 mem[[locator.x, locator.y, locator.z, locator.w]] -= 1
             }
-            // Write to stdout the current character represented by the memory 
+            // Write to stdout the current character represented by the memory
             // cell.
             Instruction::Write => print!(
                 "{}",
@@ -158,7 +158,7 @@ fn run(
                         // All is well, nothing to return.
                         Ok(()) => (),
                         // 'Falling off the hypercube' happened.
-                        // 
+                        //
                         // TODO: Should this be a panic instead?
                         Err(e) => eprintln!("{}", e),
                     }
